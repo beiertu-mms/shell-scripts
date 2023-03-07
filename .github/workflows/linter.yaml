@@ -1,0 +1,34 @@
+---
+name: Lint Files
+on:
+  push:
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint Files
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Lint
+        uses: oxsecurity/megalinter/flavors/ci_light@v6.20.0 # see https://megalinter.io/flavors/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # See https://megalinter.io/configuration/ for all available configurations
+          VALIDATE_ALL_CODEBASE: true
+          LINTER_RULES_PATH: .github/linters
+          APPLY_FIXES: none
+          LOG_LEVEL: INFO
+          PRINT_ALPACA: false
+          SHOW_ELAPSED_TIME: false
+          FILEIO_REPORTER: false
+          # see https://megalinter.io/latest/flavors/ci_light/ for all available linters used with java flavor
+          ENABLE_LINTERS: ACTION_ACTIONLINT,BASH_SHELLCHECK,REPOSITORY_GITLEAKS
+
