@@ -68,7 +68,7 @@ function update_cheatsheets() {
   for d in $(cheat -d | awk '{print $2}'); do
     echo "update $d"
     cd "$d"
-    [ -d ".git" ] && git pull
+    [[ -d ".git" ]] && git pull || echo 'no-doing'
   done
 }
 
