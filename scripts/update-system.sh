@@ -21,6 +21,14 @@ function print() {
   echo -e "\n${GREEN:-}${1}${NC:-}\n"
 }
 
+function warn() {
+  echo -e "\n${YELLOW:-}${1}${NC:-}\n"
+}
+
+function error() {
+  echo -e "\n${RED:-}${1}${NC:-}\n"
+}
+
 function update_gcloud() {
   if ! command -v gcloud &>/dev/null; then
     echo "gcloud is not installed on the system."
@@ -134,24 +142,39 @@ function update_insomnia() {
 }
 
 function update_docker_compose() {
-  if command -v docker compose version &>/dev/null; then
-    print "update docker compose plugin"
-    # https://docs.docker.com/compose/install/linux/#install-the-plugin-manually
-    local latest_url="https://api.github.com/repos/docker/compose/releases/latest"
-    local current_version
-    current_version=$(docker compose version | cut -d' ' -f4)
-    local latest_version
-    latest_version=$(curl -s -H "Accept: application/vnd.github.v3+json" "$latest_url" | jq -r '.tag_name')
+  if ! command -v docker compose version &>/dev/null; then
+    warn "docker compose plugin is not installed"
+    echo "See https://docs.docker.com/compose/install/linux/#install-the-plugin-manually for installation instruction"
+    return
+  fi
 
-    if [[ "$current_version" != "$latest_version" ]]; then
-      local output="$HOME/downloads/docker-compose"
+  print "update docker compose plugin"
+  local latest_url="https://api.github.com/repos/docker/compose/releases/latest"
+  local current_version
+  current_version=$(docker compose version | cut -d' ' -f4)
+  local latest_version
+  latest_version=$(curl -s -H "Accept: application/vnd.github.v3+json" "$latest_url" | jq -r '.tag_name')
 
-      # TODO verify download
-      curl "https://github.com/docker/compose/releases/download/${latest_version}/docker-compose-linux-x86_64" \
-        --output "$output"
-      chmod +x "$output"
-      doas mv "$output" /usr/local/lib/docker/cli-plugins/docker-compose
-    fi
+  if [[ "$current_version" == "$latest_version" ]]; then
+    echo "docker compose is up-to-date (version = $current_version)"
+    return
+  fi
+
+  local docker_compose="$HOME/downloads/docker-compose"
+  curl --location --show-error \
+    "https://github.com/docker/compose/releases/download/${latest_version}/docker-compose-linux-x86_64" \
+    --output "$docker_compose"
+
+  local checksum_file="$HOME/downloads/checksum.txt"
+  curl --location --show-error \
+    "https://github.com/docker/compose/releases/download/${latest_version}/checksums.txt" \
+    --output "$checksum_file"
+
+  if grep -q "$(sha256sum "$docker_compose" | cut -d' ' -f1)" "$checksum_file"; then
+    chmod +x "$docker_compose"
+    mv "$docker_compose" "${DOCKER_CONFIG:-~/.docker}/cli-plugins/docker-compose"
+  else
+    error "downloaded docker compose file does not match the checksum"
   fi
 }
 
