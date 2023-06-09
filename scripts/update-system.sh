@@ -178,6 +178,44 @@ function update_docker_compose() {
   fi
 }
 
+function update_detekt() {
+  if ! command -v detekt &>/dev/null; then
+    warn "detekt is not installed"
+    echo "See https://github.com/detekt/detekt for installation instruction"
+    return
+  fi
+
+  print "update detekt"
+  local latest_url="https://api.github.com/repos/detekt/detekt/releases/latest"
+  local current_version
+  current_version=$(detekt --version)
+  local latest_tag
+  local latest_version
+  latest_tag=$(curl -s -H "Accept: application/vnd.github.v3+json" "$latest_url" | jq -r '.tag_name')
+  latest_version="${latest_tag#v}"
+
+  if [[ "$current_version" == "$latest_version" ]]; then
+    echo "detekt is up-to-date (version = $current_version)"
+    return
+  fi
+
+  local detekt_zip="$HOME/downloads/detekt.zip"
+  curl --location --show-error \
+    "https://github.com/detekt/detekt/releases/download/${latest_tag}/detekt-cli-${latest_version}.zip" \
+    --output "$detekt_zip"
+
+  unzip "$detekt_zip" -d "$HOME/downloads/"
+  mv -v "$HOME/downloads/detekt-cli-$latest_version" "$HOME/.local/share/detekt/${latest_tag}/"
+
+  mkdir -vp "$HOME/.local/share/detekt/${latest_tag}/plugins"
+  curl --location --show-error \
+    "https://github.com/detekt/detekt/releases/download/${latest_tag}/detekt-formatting-${latest_version}.jar" \
+    --output "$HOME/.local/share/detekt/${latest_tag}/plugins/detekt-formatting.jar"
+
+  ln -sf "$HOME/.local/share/detekt/$latest_tag/bin/detekt-cli" "$HOME/.local/bin/detekt"
+  ln -sf "$HOME/.local/share/detekt/$latest_tag/plugins/detekt-formatting.jar" "$HOME/.local/share/detekt/formatting.jar"
+}
+
 function update_arch() {
   print "update arch"
   yay -Syyu
@@ -195,6 +233,7 @@ update_pet
 update_ktlint
 update_insomnia
 update_docker_compose
+update_detekt
 update_arch
 
 print "Finished"
