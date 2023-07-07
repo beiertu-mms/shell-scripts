@@ -14,7 +14,7 @@ usage: ./combine-prs.sh [OPTIONS]
 
 Options:
 -b  default head branch to be checkout from. Default: master
--c  feature branch name to be used. Default: build/deps/bump-versions
+-c  branch name to be used. Default: build/deps/bump-dependencies
 -s  earch criteria for branches to be considered in the combination. Default: dependabot/
 *   show this usage.
 EOF
@@ -29,7 +29,7 @@ function run() {
 
 	# Parse arguments
 	local base_branch="master"
-	local combine_branch_name="build/deps/bump-versions"
+	local combine_branch_name="build/deps/bump-dependencies"
 	local search_branch_name="dependabot/"
 
 	while getopts ":b:c:s:" option; do
