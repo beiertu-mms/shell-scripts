@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Lint
-        uses: oxsecurity/megalinter/flavors/ci_light@v7.2.1 # see https://megalinter.io/flavors/
+        uses: oxsecurity/megalinter/flavors/ci_light@v7.3.0 # see https://megalinter.io/flavors/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # See https://megalinter.io/configuration/ for all available configurations
