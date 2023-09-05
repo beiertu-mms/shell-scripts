@@ -15,7 +15,7 @@ jobs:
     if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Lint
         uses: oxsecurity/megalinter/flavors/ci_light@v7.3.0 # see https://megalinter.io/flavors/
