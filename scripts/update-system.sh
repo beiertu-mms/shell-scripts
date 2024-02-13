@@ -201,7 +201,6 @@ update_cheatsheets
 update_k8s_kind
 update_pet
 update_ktlint
-update_insomnia
 update_docker_compose
 update_detekt
 update_arch
