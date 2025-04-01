@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 #===============================================================================
-# Make Caps_Lock a second Escape and Pause a second Insert.
+# Make Caps_Lock a second Escape.
+# Make Delete an additional Insert.
 #
 # Requirements: xmodmap
+# Note: Use xev to find the keysym name of the key pressed.
 #===============================================================================
 
 set -o noclobber # Avoid overlay files (echo "hi" > foo)
@@ -13,7 +15,7 @@ set -o nounset   # Exposes unset variables
 key_configs=(
   "clear lock"
   "keysym Caps_Lock = Escape"
-  "keysym Pause = Insert"
+  "keysym Delete = Insert"
 )
 
 for config in "${key_configs[@]}"; do
