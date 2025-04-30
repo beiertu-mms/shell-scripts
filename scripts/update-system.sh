@@ -40,20 +40,6 @@ function update_gcloud() {
   gcloud components update
 }
 
-function update_confluent_cli() {
-  if ! command -v confluent &>/dev/null; then
-    echo "confluent is not installed on the system."
-    echo "install guide: https://docs.confluent.io/confluent-cli/current/install.html"
-    return
-  fi
-
-  print "update confluent"
-  confluent update
-
-  echo "update confluent completion"
-  confluent completion zsh >~/.config/zsh/completion/_confluent
-}
-
 function update_zsh_plugins() {
   print "update zsh plugins"
   for zsh_plugin_dir in "$HOME"/.local/share/zsh/plugins/*; do
@@ -195,7 +181,6 @@ function update_arch() {
 print "Start system update..."
 
 update_gcloud
-update_confluent_cli
 update_zsh_plugins
 update_cheatsheets
 update_k8s_kind
