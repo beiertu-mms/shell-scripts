@@ -174,7 +174,7 @@ function update_detekt() {
 
 function update_arch() {
   print "update arch"
-  yay -Syyu
+  yay -Syu
 }
 
 # ----- Script run -----
