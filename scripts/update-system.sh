@@ -134,6 +134,35 @@ function update_docker_compose() {
   fi
 }
 
+function update_docker_credential_helpers() {
+  local latest_url="https://api.github.com/repos/docker/docker-credential-helpers/releases/latest"
+  local latest_version
+  latest_version=$(curl -s -H "Accept: application/vnd.github.v3+json" "$latest_url" | jq -r '.tag_name')
+
+  local docker_pass="$HOME/.local/bin/docker-credential-pass"
+  local latest_version_url="https://github.com/docker/docker-credential-helpers/releases/download/${latest_version}/docker-credential-pass-${latest_version}.linux-amd64"
+
+  if ! command -v docker-credential-pass version &>/dev/null; then
+    echo "docker-credential-helpers is not installed. Installing..."
+    curl --location --show-error --output "$docker_pass" "$latest_version_url"
+    chmod +x "$docker_pass"
+    echo "installed latest version($latest_version) of docker-credential-helpers"
+    return
+  fi
+
+  local current_version
+  current_version=$(docker-credential-pass version | cut -d' ' -f3)
+
+  if [[ "$current_version" == "$latest_version" ]]; then
+    echo "docker-credential-helpers is up-to-date (version = $current_version)"
+    return
+  fi
+
+  curl --location --show-error --output "$docker_pass" "$latest_version_url"
+  chmod +x "$docker_pass"
+  echo "updated docker-credential-helpers from $current_version to $latest_version"
+}
+
 function update_detekt() {
   if ! command -v detekt &>/dev/null; then
     warn "detekt is not installed"
@@ -187,6 +216,7 @@ update_k8s_kind
 update_pet
 update_ktlint
 update_docker_compose
+update_docker_credential_helpers
 update_detekt
 update_arch
 
