@@ -15,7 +15,7 @@ usage: ./combine-prs.sh [OPTIONS]
 Options:
 -b  default head branch to be checkout from. Default: master
 -c  branch name to be used. Default: build/deps/bump-dependencies
--s  earch criteria for branches to be considered in the combination. Default: dependabot/
+-s  search criteria (grep regex pattern) for branches to be considered in the combination. Default: (dependabot|renovate)/
 *   show this usage.
 EOF
 	exit 1
@@ -30,7 +30,7 @@ function run() {
 	# Parse arguments
 	local base_branch="master"
 	local combine_branch_name="build/deps/bump-dependencies"
-	local search_branch_name="dependabot/"
+  local search_branch_name="(dependabot|renovate)/"
 
 	while getopts ":b:c:s:" option; do
 		case "${option}" in
@@ -60,10 +60,10 @@ function run() {
 	local id
 	local msg
 
-	pr_count=$(gh pr list | grep -c "$search_branch_name")
+	pr_count=$(gh pr list | grep -E -c "$search_branch_name")
 	echo -e "${GREEN}about to apply ${pr_count} PRs${NC}"
 
-	gh pr list | grep "$search_branch_name" | while read -r pr; do
+	gh pr list | grep -E "$search_branch_name" | while read -r pr; do
 		id=$(echo "$pr" | cut -f1 | xargs)
 		msg=$(echo "$pr" | cut -f2 | xargs)
 
